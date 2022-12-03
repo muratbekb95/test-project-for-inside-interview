@@ -10,9 +10,11 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 chocolatey install jq
 для остальных систем можете почитать инструкцию в https://stedolan.github.io/jq/download/
 
-Мы скачали chocolatey чтобы скачать библиотеке jq (оно нужно, чтобы извлечь токен с JSON ответа)
+Мы скачали chocolatey чтобы скачать библиотеку jq (оно нужно, чтобы извлечь токен с JSON ответа)
 
 Теперь можете приступать к исполнению команд....
+
+Убедитесь, что запустили проект!
 
 Команды для работы с endpoint-ми:
 Первые 3 команды нужны для создания пользователей Andrey с паролем 123, Rabat с паролем 234, Sarah с паролем root
