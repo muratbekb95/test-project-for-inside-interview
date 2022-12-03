@@ -1,0 +1,91 @@
+Чтобы корректно выполнить следующие команды надо запустить Windows Power Shell от имени администратора
+Вставить этот код (если у Вас Windows), чтобы скачать chocolatey: 
+
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+Подробнее можно прочитать тут: https://chocolatey.org/install
+
+Удостоверьтесь, что сначала скачаете chocolatey, потом приступайте к выполнению следующих команд снизу!!!
+Потом надо запустить от имени администратора Git Bash и вставить данный код (если у Вас windows):
+chocolatey install jq
+для остальных систем можете почитать инструкцию в https://stedolan.github.io/jq/download/
+
+Мы скачали chocolatey чтобы скачать библиотеке jq (оно нужно, чтобы извлечь токен с JSON ответа)
+
+Теперь можете приступать к исполнению команд....
+
+Команды для работы с endpoint-ми:
+Первые 3 команды нужны для создания пользователей Andrey с паролем 123, Rabat с паролем 234, Sarah с паролем root
+
+curl -H "Content-Type: application/json" -d "{\"name\":\"Andrey\", \"password\":\"123\"}" http://localhost:7777/api/v1/application/createUser
+curl -H "Content-Type: application/json" -d "{\"name\":\"Rabat\", \"password\":\"234\"}" http://localhost:7777/api/v1/application/createUser
+curl -H "Content-Type: application/json" -d "{\"name\":\"Sarah\", \"password\":\"root\"}" http://localhost:7777/api/v1/application/createUser
+
+Вы можете перейти по ссылке: http://localhost:7777/h2-console, чтобы проверить созданных пользователей
+
+Вводите следующие данные в поля:
+User name: user
+Password: test
+
+В командной строке введите команду:
+SELECT * FROM users;
+
+и снизу Вы сможете увидеть созданых пользователей.....
+
+
+Эти команды нужны, чтобы сгенерировать токен:
+
+token="$(curl -H "Content-Type: application/json" -d "{\"name\":\"Andrey\", \"password\":\"123\"}" http://localhost:7777/api/v1/application/checkPassAndCreateToken | jq -r '.')"
+token="$(cat data.json | jq -r '.token')"
+
+
+Эти команды нужны для создания сообщении отправителем:
+
+curl -X POST -i -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Do it again\"}" http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Hello world\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Dog eats meat\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Cat meows\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Windows OS is installed\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Check test\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Open new file\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Let kids go to school\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Ask your teacher about homework\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Do not regret about your decisions\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Rabat\", \"message\":\"Rabat is the city in Morocco\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Rabat\", \"message\":\"Bad things happen in life\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Rabat\", \"message\":\"Tomorrow is about to rain\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"Yesterday it snowed\"}"  http://localhost:7777/api/v1/application/history10
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"New ages begin here\"}"  http://localhost:7777/api/v1/application/history10
+
+
+Также в командной строке h2 консоли, вводите следующую команду:
+SELECT * from messages;
+
+И там отобразятся все сообщения...
+
+
+команда снизу, вернет 10 последних сообщении отправителя Andrey:
+
+curl -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Andrey\", \"message\":\"history 10\"}"  http://localhost:7777/api/v1/application/history10
+
+Только в терминале он выведит его некрасиво, лучше через Postman сгенерировать токен и вывести 10 последних сообщении отправителя 
+в postman просто сделайте запрос:
+http://localhost:7777/api/v1/application/checkPassAndCreateToken
+
+в body вставьте это:
+{
+    "name": "Andrey",
+    "password": "123"
+}
+
+вам сгенерится токен...
+
+потом сделайте другой запрос на
+localhost:7777/api/v1/application/history10
+
+в панели Authorization вставьте токен выбрав опцию Bearer Token
+затем в body:
+{
+    "name": "Andrey",
+    "message": "history 10"
+}
